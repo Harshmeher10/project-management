@@ -24,41 +24,48 @@ import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
 /* REDUX PERSISTENCE */
-const createNoopStorage = (): Storage => {
+const createNoopStorage = () => {
   return {
-    getItem: (_key: string) => Promise.resolve(null),
-    setItem: (_key: string, value: string) => Promise.resolve(value),
-    removeItem: (_key: string) => Promise.resolve(),
-  } as unknown as Storage;
+    getItem(_key: any) {
+      return Promise.resolve(null);
+    },
+    setItem(_key: any, value: any) {
+      return Promise.resolve(value);
+    },
+    removeItem(_key: any) {
+      return Promise.resolve();
+    },
+  };
 };
 
 const storage =
-  typeof window !== "undefined" ? createWebStorage("local") : createNoopStorage();
+  typeof window === "undefined"
+    ? createNoopStorage()
+    : createWebStorage("local");
 
 const persistConfig = {
   key: "root",
   storage,
   whitelist: ["global"],
 };
-
 const rootReducer = combineReducers({
   global: globalReducer,
   [api.reducerPath]: api.reducer,
 });
-
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 /* REDUX STORE */
-export const makeStore = () =>
-  configureStore({
+export const makeStore = () => {
+  return configureStore({
     reducer: persistedReducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
+    middleware: (getDefault) =>
+      getDefault({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
       }).concat(api.middleware),
   });
+};
 
 /* REDUX TYPES */
 export type AppStore = ReturnType<typeof makeStore>;
@@ -73,7 +80,8 @@ export default function StoreProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const storeRef = useRef<AppStore | null>(null);
+  const storeRef = useRef<AppStore | null>(null); // ✅ FIX: Provide an initial value
+
   if (!storeRef.current) {
     storeRef.current = makeStore();
     setupListeners(storeRef.current.dispatch);
