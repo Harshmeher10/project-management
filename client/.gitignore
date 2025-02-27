@@ -1,0 +1,18 @@
+# Ignore environment variables
+.env
+.env.local
+
+# Ignore build output
+.next/
+
+# Ignore dependencies
+node_modules/
+package-lock.json
+
+# Ignore TypeScript build artifacts
+.next/
+dist/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
