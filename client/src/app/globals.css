@@ -20,7 +20,7 @@ body,
 }
 
 /* TIMELINE STYLING */
-.timeline ._3_ygE {
+.timeline  {
   @apply rounded-tl-md border border-r-0 border-[#e6e4e4] dark:border-stroke-dark;
 }
 .timeline ._2eZzQ {
