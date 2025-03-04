@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import Navbar from "@/src/component/Navbar";
-import Sidebar from "@/src/component/Sidebar";
+import Navbar from "@/component/Navbar";
+import Sidebar from "@/component/Sidebar";
 import AuthProvider from "./authProvider";
 import StoreProvider, { useAppSelector } from "./redux";
 

@@ -1,10 +1,10 @@
 "use client";
 
-import Header from "@/src/component/Header";
-import ProjectCard from "@/src/component/ProjectCard";
-import TaskCard from "@/src/component/TaskCard";
-import UserCard from "@/src/component/UserCard";
-import { useSearchQuery } from "@/src/state/api"
+import Header from "@/component/Header";
+import ProjectCard from "@/component/ProjectCard";
+import TaskCard from "@/component/TaskCard";
+import UserCard from "@/component/UserCard";
+import { useSearchQuery } from "@/state/api"
 import { debounce } from "lodash";
 import React, { useEffect, useState } from "react";
 

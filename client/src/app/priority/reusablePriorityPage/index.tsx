@@ -1,16 +1,17 @@
 "use client";
 
-import { useAppSelector } from "@/src/app/redux";
-import Header from "@/src/component/Header";
-import ModalNewTask from "@/src/component/ModalNewTask";
-import TaskCard from "@/src/component/TaskCard";
-import { dataGridClassNames, dataGridSxStyles } from "@/src/lib/utils";
+import { useAppSelector } from "@/app/redux";
+import Header from "@/component/Header";
+import ModalNewTask from "@/component/ModalNewTask";
+import { RootState } from "@/app/redux"; 
+import TaskCard from "@/component/TaskCard";
+import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import {
   Priority,
   Task,
   useGetAuthUserQuery,
   useGetTasksByUserQuery,
-} from "@/src/state/api";
+} from "@/state/api";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import React, { useState } from "react";
 
@@ -87,7 +88,7 @@ const ReusablePriorityPage = ({ priority }: Props) => {
     skip: userId === null,
   });
 
-  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+  const isDarkMode = useAppSelector((state: RootState) => state.global.isDarkMode);
 
   const filteredTasks = tasks?.filter(
     (task: Task) => task.priority === priority,

@@ -1,8 +1,8 @@
 "use client";
-import { useGetUsersQuery } from "@/src/state/api";
+import { useGetUsersQuery } from "@/state/api";
 import React from "react";
 import { useAppSelector } from "../redux";
-import Header from "@/src/component/Header";
+import Header from "@/component/Header";
 import {
   DataGrid,
   GridColDef,
@@ -11,7 +11,7 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import Image from "next/image";
-import { dataGridClassNames, dataGridSxStyles } from "@/src/lib/utils";
+import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 
 const CustomToolbar = () => (
   <GridToolbarContainer className="toolbar flex gap-2">
