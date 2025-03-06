@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useParams } from "next/navigation";
 import ProjectHeader from "@/app/projects/ProjectHeader";
 import Board from "../BoardView";
 import List from "../ListView";
@@ -8,12 +9,10 @@ import Timeline from "../TimelineView";
 import Table from "../TableView";
 import ModalNewTask from "@/component/ModalNewTask";
 
-type Props = {
-  params: { id: string };
-};
+const Project = () => {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id || "";
 
-const Project = ({ params }: Props) => {
-  const { id } = params;
   const [activeTab, setActiveTab] = useState("Board");
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
 

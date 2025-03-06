@@ -4,29 +4,26 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getTasks = async (req: Request, res: Response): Promise<void> => {
-    const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
-  
-    try {
-      const tasks = await prisma.task.findMany({
-        where: {
-          projectId: projectId, // Ensure it's a number
-        },
-        include: {
-          author: true,
-          assignee: true,
-          comments: true,
-          attachments: true,
-        },
-      });
-  
-      res.json(tasks);
-    } catch (error: any) {
-        res
-          .status(500)
-          .json({ message: `Error creating a task: ${error.message}` });
-      }
-    };
-  
+  const { projectId } = req.query;
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        projectId: Number(projectId),
+      },
+      include: {
+        author: true,
+        assignee: true,
+        comments: true,
+        attachments: true,
+      },
+    });
+    res.json(tasks);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: `Error retrieving tasks: ${error.message}` });
+  }
+};
 
 export const createTask = async (
   req: Request,
@@ -115,10 +112,3 @@ export const getUserTasks = async (
       .json({ message: `Error retrieving user's tasks: ${error.message}` });
   }
 };
-
-
-
-
-
-
-
