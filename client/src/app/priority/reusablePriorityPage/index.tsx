@@ -3,6 +3,7 @@
 import { useAppSelector } from "@/app/redux";
 import Header from "@/component/Header";
 import ModalNewTask from "@/component/ModalNewTask";
+import ModalEditTask from "@/component/ModalEditTask";
 import { RootState } from "@/app/redux"; 
 import TaskCard from "@/component/TaskCard";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
@@ -77,6 +78,8 @@ const columns: GridColDef[] = [
 const ReusablePriorityPage = ({ priority }: Props) => {
   const [view, setView] = useState("list");
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
+  const [isModalEditTaskOpen, setIsModalEditTaskOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { data: currentUser } = useGetAuthUserQuery({});
   const userId = currentUser?.userDetails?.userId ?? null;
@@ -98,6 +101,11 @@ const ReusablePriorityPage = ({ priority }: Props) => {
     return taskPriority.toLowerCase() === expectedPriority.toLowerCase();
   }) || [];
 
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsModalEditTaskOpen(true);
+  };
+
   if (isLoading) return (
     <div className="flex items-center justify-center h-64">
       <div className="text-lg text-gray-600 dark:text-gray-300">Loading tasks...</div>
@@ -116,6 +124,16 @@ const ReusablePriorityPage = ({ priority }: Props) => {
         isOpen={isModalNewTaskOpen}
         onClose={() => setIsModalNewTaskOpen(false)}
       />
+      {editingTask && (
+        <ModalEditTask
+          isOpen={isModalEditTaskOpen}
+          onClose={() => {
+            setIsModalEditTaskOpen(false);
+            setEditingTask(null);
+          }}
+          task={editingTask}
+        />
+      )}
       <Header
         name={`${priority} Priority Tasks`}
         buttonComponent={
@@ -164,8 +182,12 @@ const ReusablePriorityPage = ({ priority }: Props) => {
         </div>
       ) : view === "list" ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredTasks.map((task: Task) => (
-            <TaskCard key={task.id} task={task} />
+          {filteredTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onEdit={handleEditTask}
+            />
           ))}
         </div>
       ) : (
@@ -177,9 +199,13 @@ const ReusablePriorityPage = ({ priority }: Props) => {
             getRowId={(row) => row.id}
             className={dataGridClassNames}
             sx={dataGridSxStyles(isDarkMode)}
+            autoHeight
+            pageSizeOptions={[5, 10, 25]}
             initialState={{
               pagination: {
-                paginationModel: { pageSize: 10, page: 0 },
+                paginationModel: {
+                  pageSize: 10,
+                },
               },
             }}
           />

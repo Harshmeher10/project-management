@@ -61,6 +61,15 @@ export interface Task {
   attachments?: Attachment[];
 }
 
+export interface Comment {
+  id: number;
+  content: string;
+  taskId: number;
+  authorId: number;
+  createdAt: string;
+  author?: User;
+}
+
 export interface SearchResults {
   tasks?: Task[];
   projects?: Project[];
@@ -87,7 +96,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["Projects", "Tasks", "Users", "Teams"],
+  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Comments"],
   endpoints: (build) => ({
     getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
@@ -162,6 +171,59 @@ export const api = createApi({
     search: build.query<SearchResults, string>({
       query: (query) => `search?query=${query}`,
     }),
+    updateTask: build.mutation<Task, { taskId: number; task: Partial<Task> }>({
+      query: ({ taskId, task }) => ({
+        url: `tasks/${taskId}`,
+        method: 'PATCH',
+        body: task,
+      }),
+      invalidatesTags: (result, error, { taskId }) => [
+        { type: 'Tasks', id: taskId },
+      ],
+    }),
+    deleteTask: build.mutation<void, number>({
+      query: (taskId) => ({
+        url: `tasks/${taskId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, taskId) => [
+        { type: 'Tasks', id: taskId },
+        { type: 'Comments', id: taskId },
+        'Tasks'
+      ],
+    }),
+    getTaskComments: build.query<Comment[], number>({
+      query: (taskId) => `tasks/${taskId}/comments`,
+      providesTags: (result, error, taskId) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'Comments' as const, id })),
+              { type: 'Comments' as const, id: taskId },
+              { type: 'Tasks' as const, id: taskId }
+            ]
+          : [{ type: 'Comments' as const, id: taskId }],
+    }),
+    addComment: build.mutation<Comment, { taskId: number; content: string }>({
+      query: ({ taskId, content }) => ({
+        url: `tasks/${taskId}/comments`,
+        method: 'POST',
+        body: { content },
+      }),
+      invalidatesTags: (result, error, { taskId }) => [
+        { type: 'Comments', id: taskId },
+        { type: 'Tasks', id: taskId }
+      ],
+    }),
+    deleteComment: build.mutation<void, { taskId: number; commentId: number }>({
+      query: ({ taskId, commentId }) => ({
+        url: `tasks/${taskId}/comments/${commentId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { taskId }) => [
+        { type: 'Comments', id: taskId },
+        { type: 'Tasks', id: taskId }
+      ],
+    }),
   }),
 });
 
@@ -176,4 +238,9 @@ export const {
   useGetTeamsQuery,
   useGetTasksByUserQuery,
   useGetAuthUserQuery,
+  useUpdateTaskMutation,
+  useDeleteTaskMutation,
+  useGetTaskCommentsQuery,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
 } = api;

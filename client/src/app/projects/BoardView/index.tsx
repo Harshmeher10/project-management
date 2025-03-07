@@ -1,11 +1,12 @@
 import { useGetTasksQuery, useUpdateTaskStatusMutation } from "@/state/api";
-import React from "react";
+import React, { useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/state/api";
 import { EllipsisVertical, MessageSquareMore, Plus } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
+import TaskComments from "@/component/TaskComments";
 
 type BoardProps = {
   id: string;
@@ -133,6 +134,7 @@ const Task = ({ task }: TaskProps) => {
       isDragging: !!monitor.isDragging(),
     }),
   }));
+  const [showComments, setShowComments] = useState(false);
 
   const taskTagsSplit = task.tags ? task.tags.split(",") : [];
 
@@ -164,95 +166,106 @@ const Task = ({ task }: TaskProps) => {
   );
 
   return (
-    <div
-      ref={(instance) => {
-        drag(instance);
-      }}
-      className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary ${
-        isDragging ? "opacity-50" : "opacity-100"
-      }`}
-    >
-      {task.attachments && task.attachments.length > 0 && (
-        <Image
-          src={`https://pm-s2-images.s3.ap-south-1.amazonaws.com/${task.attachments[0].fileURL}`}
-          alt={task.attachments[0].fileName}
-          width={400}
-          height={200}
-          className="h-auto w-full rounded-t-md"
-        />
-      )}
-      <div className="p-4 md:p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex flex-1 flex-wrap items-center gap-2">
-            {task.priority && <PriorityTag priority={task.priority} />}
-            <div className="flex gap-2">
-              {taskTagsSplit.map((tag) => (
-                <div
-                  key={tag}
-                  className="rounded-full bg-blue-100 px-2 py-1 text-xs"
-                >
-                  {" "}
-                  {tag}
-                </div>
-              ))}
+    <>
+      <div
+        ref={(instance) => {
+          drag(instance);
+        }}
+        className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary ${
+          isDragging ? "opacity-50" : "opacity-100"
+        }`}
+      >
+        {task.attachments && task.attachments.length > 0 && (
+          <Image
+            src={`https://pm-s2-images.s3.ap-south-1.amazonaws.com/${task.attachments[0].fileURL}`}
+            alt={task.attachments[0].fileName}
+            width={400}
+            height={200}
+            className="h-auto w-full rounded-t-md"
+          />
+        )}
+        <div className="p-4 md:p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex flex-1 flex-wrap items-center gap-2">
+              {task.priority && <PriorityTag priority={task.priority} />}
+              <div className="flex gap-2">
+                {taskTagsSplit.map((tag) => (
+                  <div
+                    key={tag}
+                    className="rounded-full bg-blue-100 px-2 py-1 text-xs"
+                  >
+                    {" "}
+                    {tag}
+                  </div>
+                ))}
+              </div>
             </div>
+            <button className="flex h-6 w-4 flex-shrink-0 items-center justify-center dark:text-neutral-500">
+              <EllipsisVertical size={26} />
+            </button>
           </div>
-          <button className="flex h-6 w-4 flex-shrink-0 items-center justify-center dark:text-neutral-500">
-            <EllipsisVertical size={26} />
-          </button>
-        </div>
 
-        <div className="my-3 flex justify-between">
-          <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
-          {typeof task.points === "number" && (
-            <div className="text-xs font-semibold dark:text-white">
-              {task.points} pts
-            </div>
-          )}
-        </div>
-
-        <div className="text-xs text-gray-500 dark:text-neutral-500">
-          {formattedStartDate && <span>{formattedStartDate} - </span>}
-          {formattedDueDate && <span>{formattedDueDate}</span>}
-        </div>
-        <p className="text-sm text-gray-600 dark:text-neutral-500">
-          {task.description}
-        </p>
-        <div className="mt-4 border-t border-gray-200 dark:border-stroke-dark" />
-
-        {/* Users */}
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex -space-x-[6px] overflow-hidden">
-            {task.assignee && (
-              <Image
-                key={task.assignee.userId}
-                src={`https://pm-s2-images.s3.ap-south-1.amazonaws.com/${task.assignee.profilePictureUrl!}`}
-                alt={task.assignee.username}
-                width={30}
-                height={30}
-                className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
-              />
-            )}
-            {task.author && (
-              <Image
-                key={task.author.userId}
-                src={`https://pm-s2-images.s3.ap-south-1.amazonaws.com/${task.author.profilePictureUrl!}`}
-                alt={task.author.username}
-                width={30}
-                height={30}
-                className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
-              />
+          <div className="my-3 flex justify-between">
+            <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
+            {typeof task.points === "number" && (
+              <div className="text-xs font-semibold dark:text-white">
+                {task.points} pts
+              </div>
             )}
           </div>
-          <div className="flex items-center text-gray-500 dark:text-neutral-500">
-            <MessageSquareMore size={20} />
-            <span className="ml-1 text-sm dark:text-neutral-400">
-              {numberOfComments}
-            </span>
+
+          <div className="text-xs text-gray-500 dark:text-neutral-500">
+            {formattedStartDate && <span>{formattedStartDate} - </span>}
+            {formattedDueDate && <span>{formattedDueDate}</span>}
+          </div>
+          <p className="text-sm text-gray-600 dark:text-neutral-500">
+            {task.description}
+          </p>
+          <div className="mt-4 border-t border-gray-200 dark:border-stroke-dark" />
+
+          {/* Users */}
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex -space-x-[6px] overflow-hidden">
+              {task.assignee && (
+                <Image
+                  key={task.assignee.userId}
+                  src={`https://pm-s2-images.s3.ap-south-1.amazonaws.com/${task.assignee.profilePictureUrl!}`}
+                  alt={task.assignee.username}
+                  width={30}
+                  height={30}
+                  className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
+                />
+              )}
+              {task.author && (
+                <Image
+                  key={task.author.userId}
+                  src={`https://pm-s2-images.s3.ap-south-1.amazonaws.com/${task.author.profilePictureUrl!}`}
+                  alt={task.author.username}
+                  width={30}
+                  height={30}
+                  className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
+                />
+              )}
+            </div>
+            <button
+              onClick={() => setShowComments(true)}
+              className="flex items-center text-gray-500 dark:text-neutral-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
+            >
+              <MessageSquareMore size={20} />
+              <span className="ml-1 text-sm dark:text-neutral-400">
+                {numberOfComments}
+              </span>
+            </button>
           </div>
         </div>
       </div>
-    </div>
+
+      <TaskComments
+        isOpen={showComments}
+        onClose={() => setShowComments(false)}
+        task={task}
+      />
+    </>
   );
 };
 
