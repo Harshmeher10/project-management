@@ -21,33 +21,61 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
   const [authorUserId, setAuthorUserId] = useState("");
   const [assignedUserId, setAssignedUserId] = useState("");
   const [projectId, setProjectId] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setStatus(Status.ToDo);
+    setPriority(Priority.Backlog);
+    setTags("");
+    setStartDate("");
+    setDueDate("");
+    setAuthorUserId("");
+    setAssignedUserId("");
+    setProjectId("");
+    setError(null);
+  };
 
   const handleSubmit = async () => {
-    if (!title || !authorUserId || !(id !== null || projectId)) return;
+    try {
+      setError(null);
+      if (!title) {
+        setError("Title is required");
+        return;
+      }
+      if (!authorUserId) {
+        setError("Author User ID is required");
+        return;
+      }
+      if (!id && !projectId) {
+        setError("Project ID is required");
+        return;
+      }
 
-    const formattedStartDate = formatISO(new Date(startDate), {
-      representation: "complete",
-    });
-    const formattedDueDate = formatISO(new Date(dueDate), {
-      representation: "complete",
-    });
+      const taskData = {
+        title,
+        description,
+        status,
+        priority,
+        tags,
+        startDate: startDate ? formatISO(new Date(startDate)) : undefined,
+        dueDate: dueDate ? formatISO(new Date(dueDate)) : undefined,
+        authorUserId: parseInt(authorUserId),
+        assignedUserId: assignedUserId ? parseInt(assignedUserId) : undefined,
+        projectId: id ? parseInt(id) : parseInt(projectId),
+      };
 
-    await createTask({
-      title,
-      description,
-      status,
-      priority,
-      tags,
-      startDate: formattedStartDate,
-      dueDate: formattedDueDate,
-      authorUserId: parseInt(authorUserId),
-      assignedUserId: parseInt(assignedUserId),
-      projectId: id !== null ? Number(id) : Number(projectId),
-    });
+      await createTask(taskData).unwrap();
+      resetForm();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create task");
+    }
   };
 
   const isFormValid = () => {
-    return title && authorUserId && !(id !== null || projectId);
+    return title && authorUserId && (id || projectId);
   };
 
   const selectStyles =
@@ -65,12 +93,20 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           handleSubmit();
         }}
       >
+        {error && (
+          <div className="rounded-md bg-red-50 p-4 mb-4">
+            <div className="flex">
+              <div className="text-sm text-red-700">{error}</div>
+            </div>
+          </div>
+        )}
         <input
           type="text"
           className={inputStyles}
-          placeholder="Title"
+          placeholder="Title *"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          required
         />
         <textarea
           className={inputStyles}
@@ -86,7 +122,6 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
               setStatus(Status[e.target.value as keyof typeof Status])
             }
           >
-            <option value="">Select Status</option>
             <option value={Status.ToDo}>To Do</option>
             <option value={Status.WorkInProgress}>Work In Progress</option>
             <option value={Status.UnderReview}>Under Review</option>
@@ -99,7 +134,6 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
               setPriority(Priority[e.target.value as keyof typeof Priority])
             }
           >
-            <option value="">Select Priority</option>
             <option value={Priority.Urgent}>Urgent</option>
             <option value={Priority.High}>High</option>
             <option value={Priority.Medium}>Medium</option>
@@ -132,9 +166,10 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
         <input
           type="text"
           className={inputStyles}
-          placeholder="Author User ID"
+          placeholder="Author User ID *"
           value={authorUserId}
           onChange={(e) => setAuthorUserId(e.target.value)}
+          required
         />
         <input
           type="text"
@@ -147,14 +182,15 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           <input
             type="text"
             className={inputStyles}
-            placeholder="ProjectId"
+            placeholder="Project ID *"
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
+            required
           />
         )}
         <button
           type="submit"
-          className={`focus-offset-2 mt-4 flex w-full justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+          className={`focus-offset-2 mt-4 flex w-full justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors duration-200 ${
             !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
           }`}
           disabled={!isFormValid() || isLoading}

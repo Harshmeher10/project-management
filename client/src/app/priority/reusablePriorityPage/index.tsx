@@ -90,9 +90,13 @@ const ReusablePriorityPage = ({ priority }: Props) => {
 
   const isDarkMode = useAppSelector((state: RootState) => state.global.isDarkMode);
 
-  const filteredTasks = tasks?.filter(
-    (task: Task) => task.priority?.toString() === priority?.toString()
-  ) || [];
+  // Filter tasks by priority
+  const filteredTasks = tasks?.filter((task: Task) => {
+    // Handle both string and enum cases
+    const taskPriority = task.priority?.toString() || '';
+    const expectedPriority = priority?.toString() || '';
+    return taskPriority.toLowerCase() === expectedPriority.toLowerCase();
+  }) || [];
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64">
@@ -173,6 +177,11 @@ const ReusablePriorityPage = ({ priority }: Props) => {
             getRowId={(row) => row.id}
             className={dataGridClassNames}
             sx={dataGridSxStyles(isDarkMode)}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10, page: 0 },
+              },
+            }}
           />
         </div>
       )}
