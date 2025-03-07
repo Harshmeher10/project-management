@@ -91,10 +91,20 @@ const ReusablePriorityPage = ({ priority }: Props) => {
   const isDarkMode = useAppSelector((state: RootState) => state.global.isDarkMode);
 
   const filteredTasks = tasks?.filter(
-    (task: Task) => task.priority === priority,
+    (task: Task) => task.priority?.toString() === priority?.toString()
+  ) || [];
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg text-gray-600 dark:text-gray-300">Loading tasks...</div>
+    </div>
   );
 
-  if (isTasksError || !tasks) return <div>Error fetching tasks</div>;
+  if (isTasksError) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg text-red-600 dark:text-red-400">Error fetching tasks</div>
+    </div>
+  );
 
   return (
     <div className="m-5 p-4">
@@ -103,10 +113,10 @@ const ReusablePriorityPage = ({ priority }: Props) => {
         onClose={() => setIsModalNewTaskOpen(false)}
       />
       <Header
-        name="Priority Page"
+        name={`${priority} Priority Tasks`}
         buttonComponent={
           <button
-            className="mr-3 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+            className="mr-3 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 transition-colors duration-200"
             onClick={() => setIsModalNewTaskOpen(true)}
           >
             Add Task
@@ -115,44 +125,56 @@ const ReusablePriorityPage = ({ priority }: Props) => {
       />
       <div className="mb-4 flex justify-start">
         <button
-          className={`px-4 py-2 ${
-            view === "list" ? "bg-gray-300" : "bg-white"
-          } rounded-l`}
+          className={`px-4 py-2 transition-colors duration-200 ${
+            view === "list" 
+              ? "bg-blue-500 text-white" 
+              : "bg-white dark:bg-gray-800 dark:text-gray-200"
+          } rounded-l border border-gray-200 dark:border-gray-700`}
           onClick={() => setView("list")}
         >
           List
         </button>
         <button
-          className={`px-4 py-2 ${
-            view === "table" ? "bg-gray-300" : "bg-white"
-          } rounded-l`}
+          className={`px-4 py-2 transition-colors duration-200 ${
+            view === "table" 
+              ? "bg-blue-500 text-white" 
+              : "bg-white dark:bg-gray-800 dark:text-gray-200"
+          } rounded-r border border-l-0 border-gray-200 dark:border-gray-700`}
           onClick={() => setView("table")}
         >
           Table
         </button>
       </div>
-      {isLoading ? (
-        <div>Loading tasks...</div>
+
+      {filteredTasks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <div className="text-lg text-gray-600 dark:text-gray-300 mb-4">
+            No {priority.toLowerCase()} priority tasks found
+          </div>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
+            onClick={() => setIsModalNewTaskOpen(true)}
+          >
+            Create a new task
+          </button>
+        </div>
       ) : view === "list" ? (
-        <div className="grid grid-cols-1 gap-4">
-          {filteredTasks?.map((task: Task) => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTasks.map((task: Task) => (
             <TaskCard key={task.id} task={task} />
           ))}
         </div>
       ) : (
-        view === "table" &&
-        filteredTasks && (
-          <div className="z-0 w-full">
-            <DataGrid
-              rows={filteredTasks}
-              columns={columns}
-              checkboxSelection
-              getRowId={(row) => row.id}
-              className={dataGridClassNames}
-              sx={dataGridSxStyles(isDarkMode)}
-            />
-          </div>
-        )
+        <div className="h-[600px] w-full">
+          <DataGrid
+            rows={filteredTasks}
+            columns={columns}
+            checkboxSelection
+            getRowId={(row) => row.id}
+            className={dataGridClassNames}
+            sx={dataGridSxStyles(isDarkMode)}
+          />
+        </div>
       )}
     </div>
   );
