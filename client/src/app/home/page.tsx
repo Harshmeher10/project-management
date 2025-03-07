@@ -27,10 +27,38 @@ import {
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 
 const taskColumns: GridColDef[] = [
-  { field: "title", headerName: "Title", width: 200 },
-  { field: "status", headerName: "Status", width: 150 },
-  { field: "priority", headerName: "Priority", width: 150 },
-  { field: "dueDate", headerName: "Due Date", width: 150 },
+  { 
+    field: "title", 
+    headerName: "Title", 
+    width: 200,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
+  { 
+    field: "status", 
+    headerName: "Status", 
+    width: 150,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
+  { 
+    field: "priority", 
+    headerName: "Priority", 
+    width: 150,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
+  { 
+    field: "dueDate", 
+    headerName: "Due Date", 
+    width: 150,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
 ];
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];

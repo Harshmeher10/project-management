@@ -20,13 +20,37 @@ const CustomToolbar = () => (
 );
 
 const columns: GridColDef[] = [
-  { field: "id", headerName: "Team ID", width: 100 },
-  { field: "teamName", headerName: "Team Name", width: 200 },
-  { field: "productOwnerUsername", headerName: "Product Owner", width: 200 },
+  { 
+    field: "id", 
+    headerName: "Team ID", 
+    width: 100,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
+  { 
+    field: "teamName", 
+    headerName: "Team Name", 
+    width: 200,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
+  { 
+    field: "productOwnerUsername", 
+    headerName: "Product Owner", 
+    width: 200,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
   {
     field: "projectManagerUsername",
     headerName: "Project Manager",
     width: 200,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
   },
 ];
 

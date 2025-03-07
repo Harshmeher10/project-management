@@ -21,8 +21,22 @@ const CustomToolbar = () => (
 );
 
 const columns: GridColDef[] = [
-  { field: "userId", headerName: "ID", width: 100 },
-  { field: "username", headerName: "Username", width: 150 },
+  { 
+    field: "userId", 
+    headerName: "ID", 
+    width: 100,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
+  { 
+    field: "username", 
+    headerName: "Username", 
+    width: 150,
+    renderCell: (params) => (
+      <div className="text-gray-900 dark:text-white">{params.value}</div>
+    )
+  },
   {
     field: "profilePictureUrl",
     headerName: "Profile Picture",

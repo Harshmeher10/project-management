@@ -13,6 +13,7 @@ type Props = {
 const TaskCard = ({ task, onEdit }: Props) => {
   const [showOptions, setShowOptions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
 
@@ -29,12 +30,15 @@ const TaskCard = ({ task, onEdit }: Props) => {
         throw new Error('Task ID is required for deletion');
       }
       
+      setIsDeleting(true);
       await deleteTask(task.id).unwrap();
       setShowDeleteConfirm(false);
       setShowOptions(false);
     } catch (error: any) {
       console.error('Failed to delete task:', error);
       alert(error.data?.message || error.message || 'Failed to delete task. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -156,11 +160,11 @@ const TaskCard = ({ task, onEdit }: Props) => {
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center">
             <span className="text-gray-500 dark:text-gray-400">Author:</span>
-            <span className="ml-1 font-medium">{task.author ? task.author.username : "Unknown"}</span>
+            <span className="ml-1 font-medium text-gray-900 dark:text-white">{task.author ? task.author.username : "Unknown"}</span>
           </div>
           <div className="flex items-center">
             <span className="text-gray-500 dark:text-gray-400">Assignee:</span>
-            <span className="ml-1 font-medium">{task.assignee ? task.assignee.username : "Unassigned"}</span>
+            <span className="ml-1 font-medium text-gray-900 dark:text-white">{task.assignee ? task.assignee.username : "Unassigned"}</span>
           </div>
         </div>
       </div>
@@ -175,15 +179,17 @@ const TaskCard = ({ task, onEdit }: Props) => {
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded"
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded disabled:opacity-50"
               >
-                Delete
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
